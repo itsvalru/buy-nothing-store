@@ -1,7 +1,7 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
 import { UserProvider } from "@/context/UserContext";
-import Header from "@/components/Header";
+import ClientHeader from "@/components/ClientHeader";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,7 +19,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <UserProvider>
-          <Header />
+          <ClientHeader />
           <main>{children}</main>
         </UserProvider>
       </body>

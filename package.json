@@ -12,6 +12,7 @@
     "@mollie/api-client": "^4.3.2",
     "@supabase/supabase-js": "^2.49.8",
     "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
     "framer-motion": "^12.15.0",
     "next": "15.3.2",
     "next-auth": "^4.24.11",
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
