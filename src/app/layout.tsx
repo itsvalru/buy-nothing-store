@@ -1,7 +1,11 @@
 import "./globals.css";
-import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { UserProvider } from "@/context/UserContext";
+import Header from "@/components/Header";
 
-export const metadata: Metadata = {
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata = {
   title: "Buy Nothing Store",
   description: "We sell literally nothing",
 };
@@ -13,7 +17,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-black text-white min-h-screen">{children}</body>
+      <body className={inter.className}>
+        <UserProvider>
+          <Header />
+          <main>{children}</main>
+        </UserProvider>
+      </body>
     </html>
   );
 }
