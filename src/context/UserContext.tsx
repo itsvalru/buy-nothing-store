@@ -10,57 +10,58 @@ interface User {
   display_name?: string;
 }
 
-interface UserContextType {
-  user: User | null;
-  loading: boolean;
-}
-
-const UserContext = createContext<UserContextType>({
-  user: null,
-  loading: true,
-});
+const UserContext = createContext<User | null>(null);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUser = async () => {
-    setLoading(true);
-    const { data: sessionData } = await supabase.auth.getSession();
-
-    if (sessionData.session?.user) {
-      const { data: userProfile } = await supabase
-        .from("users")
-        .select("id, email, avatar_url, display_name")
-        .eq("id", sessionData.session.user.id)
-        .single();
-
-      if (userProfile) setUser(userProfile);
-      else setUser(null);
-    } else {
-      setUser(null);
-    }
-
-    setLoading(false);
-  };
-
   useEffect(() => {
-    fetchUser();
+    const getUser = async () => {
+      setLoading(true);
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-    const { data: listener } = supabase.auth.onAuthStateChange(() => {
-      fetchUser();
-    });
+      if (session?.user) {
+        const { data: userProfile } = await supabase
+          .from("users")
+          .select("id, email, avatar_url, display_name")
+          .eq("id", session.user.id)
+          .single();
+
+        if (userProfile) {
+          setUser(userProfile);
+        } else {
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+
+      setLoading(false);
+    };
+
+    getUser();
+
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (session?.user) {
+          getUser();
+        } else {
+          setUser(null);
+        }
+      }
+    );
 
     return () => {
       listener.subscription.unsubscribe();
     };
   }, []);
 
-  return (
-    <UserContext.Provider value={{ user, loading }}>
-      {!loading && children}
-    </UserContext.Provider>
-  );
+  if (loading) return null;
+
+  return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
 }
 
 export function useUser() {
