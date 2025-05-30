@@ -31,6 +31,8 @@ export default function Header() {
     router.refresh();
   };
 
+  console.log("Header user:", user);
+
   return (
     <header className="bg-black text-white py-4 px-6 flex justify-between items-center">
       <Link href="/" className="text-xl font-bold">

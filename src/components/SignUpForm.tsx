@@ -8,7 +8,7 @@ export default function SignUpForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -16,68 +16,61 @@ export default function SignUpForm() {
     e.preventDefault();
     setError(null);
 
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp(
-      {
-        email,
-        password,
-      }
-    );
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
 
-    if (signUpError || !signUpData.user) {
-      setError(signUpError?.message || "Signup failed");
+    if (signUpError) {
+      setError(signUpError.message);
       return;
     }
 
-    let avatarUrl = `https://api.dicebear.com/7.x/thumbs/svg?seed=${displayName}`;
+    if (data.user) {
+      // Check if user already exists in `users` table
+      const { data: existing } = await supabase
+        .from("users")
+        .select("id")
+        .eq("id", data.user.id);
 
-    if (avatarFile) {
-      const fileExt = avatarFile.name.split(".").pop();
-      const filePath = `avatars/${signUpData.user.id}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(filePath, avatarFile, {
-          cacheControl: "3600",
-          upsert: true,
+      if (!existing || existing.length === 0) {
+        await supabase.from("users").insert({
+          id: data.user.id,
+          email: data.user.email,
+          display_name: displayName,
+          avatar_url: avatarUrl || null,
         });
-
-      if (!uploadError) {
-        const { data } = supabase.storage
-          .from("avatars")
-          .getPublicUrl(filePath);
-        avatarUrl = data.publicUrl;
       }
     }
 
-    const { error: insertError } = await supabase
-      .from("users")
-      .update({
-        display_name: displayName,
-        avatar_url: avatarUrl,
-      })
-      .eq("id", signUpData.user.id);
-
-    if (insertError) {
-      setError(insertError.message);
-      return;
-    }
-
+    alert("Signup successful! Check your email to confirm.");
     router.push("/");
+    router.refresh();
   };
 
   return (
-    <form
-      onSubmit={handleSignup}
-      className="space-y-4 bg-white p-6 rounded shadow max-w-md mx-auto"
-    >
-      <h2 className="text-xl font-bold text-black">Sign Up</h2>
-      {error && <p className="text-red-500">{error}</p>}
+    <form onSubmit={handleSignup} className="space-y-4">
+      <input
+        type="text"
+        placeholder="Display Name"
+        value={displayName}
+        onChange={(e) => setDisplayName(e.target.value)}
+        className="w-full px-4 py-2 border rounded"
+        required
+      />
+      <input
+        type="text"
+        placeholder="Avatar URL (optional)"
+        value={avatarUrl}
+        onChange={(e) => setAvatarUrl(e.target.value)}
+        className="w-full px-4 py-2 border rounded"
+      />
       <input
         type="email"
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="w-full px-3 py-2 border rounded"
+        className="w-full px-4 py-2 border rounded"
         required
       />
       <input
@@ -85,28 +78,15 @@ export default function SignUpForm() {
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        className="w-full px-3 py-2 border rounded"
+        className="w-full px-4 py-2 border rounded"
         required
       />
-      <input
-        type="text"
-        placeholder="Display Name"
-        value={displayName}
-        onChange={(e) => setDisplayName(e.target.value)}
-        className="w-full px-3 py-2 border rounded"
-        required
-      />
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
-        className="w-full"
-      />
+      {error && <p className="text-red-500 text-sm">{error}</p>}
       <button
         type="submit"
-        className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
+        className="w-full py-2 px-4 bg-black text-white rounded hover:bg-gray-800"
       >
-        Create Account
+        Sign Up
       </button>
     </form>
   );

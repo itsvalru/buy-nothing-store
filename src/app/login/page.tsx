@@ -27,6 +27,7 @@ export default function AuthPage() {
     }
 
     router.push("/");
+    router.refresh();
   };
 
   return (
