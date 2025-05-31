@@ -19,7 +19,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Validate product input
   if (
     !product ||
     typeof product.slug !== "string" ||
@@ -34,14 +33,6 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    console.log("Creating Mollie payment for:", {
-      name: product.name,
-      price: product.price,
-      slug: product.slug,
-      method,
-      user_id: user.id,
-    });
-
     const payment = await mollie.payments.create({
       amount: {
         currency: "EUR",

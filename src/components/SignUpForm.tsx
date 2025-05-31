@@ -3,130 +3,122 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import AvatarUploader from "@/components/AvatarUploader";
 
 export default function SignupForm() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const router = useRouter();
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSignup = async () => {
     setLoading(true);
-    setError("");
-
-    const { data, error: signUpError } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
     });
 
-    if (signUpError || !data.user) {
-      setError(signUpError?.message || "Sign up failed");
+    if (error) {
+      alert(error.message);
       setLoading(false);
       return;
     }
 
-    let avatar_url = null;
+    const user = data.user;
+    if (!user) {
+      alert("No user returned");
+      setLoading(false);
+      return;
+    }
+
+    let avatarUrl = `https://api.dicebear.com/7.x/thumbs/png?seed=${displayName}`;
 
     if (avatarFile) {
       const fileExt = avatarFile.name.split(".").pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
+      const filePath = `${user.id}/avatar.${fileExt}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(filePath, avatarFile);
+        .upload(filePath, avatarFile, {
+          upsert: true,
+          contentType: avatarFile.type,
+        });
 
-      if (!uploadError) {
-        const publicUrlResponse = supabase.storage
+      if (uploadError) {
+        console.error("Avatar upload error:", uploadError);
+      } else {
+        const { data: urlData } = supabase.storage
           .from("avatars")
           .getPublicUrl(filePath);
-        console.log("Public URL Response:", publicUrlResponse);
-
-        avatar_url = publicUrlResponse.data.publicUrl;
+        avatarUrl = urlData?.publicUrl || avatarUrl;
       }
     }
 
-    const insertRes = await supabase.from("users").insert([
-      {
-        id: data.user.id,
-        email: data.user.email,
-        display_name: displayName,
-        avatar_url,
-      },
-    ]);
+    const { error: insertError } = await supabase.from("users").insert({
+      id: user.id,
+      email,
+      display_name: displayName,
+      total_spent: 0,
+      avatar_url: avatarUrl,
+    });
 
-    if (insertRes.error) {
-      console.error("User insert failed:", insertRes.error.message);
+    if (insertError) {
+      alert(insertError.message);
+      setLoading(false);
+      return;
     }
 
-    router.refresh();
-    router.push("/");
-    setLoading(false);
+    router.push("/settings");
   };
 
   return (
-    <form onSubmit={handleSignup} className="space-y-4">
-      <div className="flex justify-center">
-        <label htmlFor="avatar">
-          <img
-            src={
-              avatarFile
-                ? URL.createObjectURL(avatarFile)
-                : "https://api.dicebear.com/7.x/thumbs/svg?seed=default"
-            }
-            alt="Avatar Preview"
-            className="w-20 h-20 rounded-full cursor-pointer object-cover"
-          />
-          <input
-            id="avatar"
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              if (e.target.files?.[0]) {
-                setAvatarFile(e.target.files[0]);
-              }
-            }}
-            className="hidden"
-          />
-        </label>
+    <div className="max-w-md mx-auto py-12 px-6">
+      <h1 className="text-3xl font-bold mb-6 text-center">Create Account</h1>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-1">Display Name</label>
+        <input
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+          className="w-full p-2 rounded bg-gray-800 text-white border border-gray-600"
+        />
       </div>
 
-      <input
-        type="text"
-        placeholder="Display Name"
-        value={displayName}
-        onChange={(e) => setDisplayName(e.target.value)}
-        required
-        className="w-full p-2 border border-gray-300 rounded"
-      />
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-        className="w-full p-2 border border-gray-300 rounded"
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-        className="w-full p-2 border border-gray-300 rounded"
-      />
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-1">Email</label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-2 rounded bg-gray-800 text-white border border-gray-600"
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-1">Password</label>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-2 rounded bg-gray-800 text-white border border-gray-600"
+        />
+      </div>
+
+      <div className="mb-6">
+        <AvatarUploader
+          displayName={displayName || email}
+          onImageCropped={setAvatarFile}
+        />
+      </div>
+
       <button
-        type="submit"
+        onClick={handleSignup}
         disabled={loading}
-        className="w-full bg-black text-white py-2 px-4 rounded hover:bg-gray-800"
+        className="bg-white text-black px-6 py-3 font-bold rounded-xl hover:bg-gray-200 transition w-full"
       >
-        {loading ? "Signing up..." : "Sign Up"}
+        {loading ? "Creating Account..." : "Sign Up"}
       </button>
-    </form>
+    </div>
   );
 }
