@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 interface User {
   id: string;
@@ -41,11 +42,26 @@ export default function LeaderboardPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6 text-center">🏆 Leaderboard</h1>
-      <ul className="space-y-4">
+      <motion.ul
+        className="space-y-4"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          visible: {
+            transition: {
+              staggerChildren: 0.06,
+            },
+          },
+        }}
+      >
         {users.map((user, index) => (
-          <li
+          <motion.li
             key={user.id}
-            className="flex items-center gap-4 bg-white p-4 rounded shadow"
+            className="flex items-center gap-4 bg-white p-4 rounded-2xl shadow"
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0 },
+            }}
           >
             <span className="text-lg font-bold w-6 text-right">
               {index + 1}
@@ -63,10 +79,12 @@ export default function LeaderboardPage() {
             <div className="flex-1">
               <p className="font-semibold">{user.display_name}</p>
             </div>
-            <span className="font-mono">€{user.total_spent.toFixed(2)}</span>
-          </li>
+            <span className="font-mono text-gray-700">
+              €{user.total_spent.toFixed(2)}
+            </span>
+          </motion.li>
         ))}
-      </ul>
+      </motion.ul>
     </div>
   );
 }

@@ -1,10 +1,12 @@
-import { products } from "@/lib/products";
 import { notFound } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 import BuyButton from "@/components/BuyButton";
 import Link from "next/link";
 
 export async function generateStaticParams() {
-  return products.map((product) => ({
+  const { data: products } = await supabase.from("products").select("slug");
+
+  return (products || []).map((product) => ({
     slug: product.slug,
   }));
 }
@@ -14,13 +16,15 @@ export default async function ProductDetail({
 }: {
   params: { slug: string };
 }) {
-  const product = products.find((p) => p.slug === params.slug);
+  const { data: product, error } = await supabase
+    .from("products")
+    .select("*")
+    .eq("slug", params.slug)
+    .single();
 
-  if (!product) {
+  if (!product || error) {
     notFound();
   }
-
-  console.log("ENV STRIPE KEY:", process.env.STRIPE_SECRET_KEY);
 
   return (
     <div className="min-h-screen max-w-3xl mx-auto px-6 py-12">
