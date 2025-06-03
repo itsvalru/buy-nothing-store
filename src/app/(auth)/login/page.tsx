@@ -8,23 +8,21 @@ export default function AuthPage() {
   const [isLoginMode, setIsLoginMode] = useState(true);
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-black text-white px-4">
-      <div className="w-full max-w-md bg-white text-black rounded-lg p-8 shadow-lg">
-        <h1 className="text-2xl font-bold text-center mb-6">
-          \ {isLoginMode ? "Log In" : "Sign Up"}
-        </h1>
+    <div className="min-h-screen flex items-center justify-center bg-black text-white px-4 py-12">
+      <div className="w-full max-w-md">
+        <h1 className="text-3xl font-extrabold text-center mb-6"></h1>
 
         {isLoginMode ? <LoginForm /> : <SignupForm />}
 
-        <p className="text-center text-sm mt-6">
-          {isLoginMode ? "Don't have an account?" : "Already have an account?"}{" "}
+        <div className="mt-4 text-center text-sm text-gray-400">
+          {isLoginMode ? "Don’t have an account?" : "Already registered?"}{" "}
           <button
             onClick={() => setIsLoginMode(!isLoginMode)}
-            className="text-blue-600 hover:underline"
+            className="text-blue-400 hover:underline font-medium"
           >
-            {isLoginMode ? "Sign up" : "Log in"}
+            {isLoginMode ? "Sign Up" : "Log In"}
           </button>
-        </p>
+        </div>
       </div>
     </div>
   );

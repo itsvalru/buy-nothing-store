@@ -18,43 +18,49 @@ export default function LoginForm() {
       password,
     });
 
-    console.log("Login result:", data, error);
-
     if (error) {
       setErrorMsg(error.message);
     } else {
-      router.push("/"); // redirect to homepage
+      router.push("/");
     }
   };
 
   return (
-    <form onSubmit={handleLogin} className="space-y-4 max-w-md mx-auto">
-      <h2 className="text-2xl font-bold">Login</h2>
-
-      {errorMsg && <p className="text-red-500">{errorMsg}</p>}
-
-      <input
-        type="email"
-        placeholder="Email"
-        className="w-full p-2 border rounded"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        className="w-full p-2 border rounded"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
-      <button
-        type="submit"
-        className="w-full p-2 bg-white text-black rounded font-bold hover:bg-gray-200 transition"
+    <div className="flex items-center justify-center px-4">
+      <form
+        onSubmit={handleLogin}
+        className="bg-gray-900 text-white w-full max-w-md p-8 rounded-2xl shadow-xl space-y-6"
       >
-        Login
-      </button>
-    </form>
+        <h2 className="text-3xl font-extrabold text-center">Welcome Back</h2>
+
+        {errorMsg && (
+          <p className="text-red-500 text-sm text-center">{errorMsg}</p>
+        )}
+
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full bg-gray-800 p-3 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full bg-gray-800 p-3 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+
+        <button
+          type="submit"
+          className="w-full bg-white text-black font-bold py-3 rounded-lg hover:bg-gray-200 transition"
+        >
+          Login
+        </button>
+      </form>
+    </div>
   );
 }

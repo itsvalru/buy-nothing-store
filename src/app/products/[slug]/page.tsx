@@ -28,22 +28,30 @@ export default async function ProductDetail({
 
   return (
     <div className="min-h-screen max-w-3xl mx-auto px-6 py-12">
-      <Link href="/products" className="text-sm text-gray-400 hover:underline">
+      <Link
+        href="/products"
+        className="text-sm text-gray-400 hover:underline mb-6 inline-block"
+      >
         ← Back to Products
       </Link>
 
-      <h1 className="text-4xl font-bold mt-4 mb-2">{product.name}</h1>
-      <p className="text-gray-400 mb-4">{product.description}</p>
+      <div className="bg-gray-800 p-6 rounded-xl shadow-md">
+        <h1 className="text-4xl font-extrabold text-white mb-2">
+          {product.name}
+        </h1>
+        <p className="text-gray-400 mb-4 text-lg">{product.description}</p>
 
-      <span className="inline-block bg-gray-700 text-sm px-3 py-1 rounded-full mb-4">
-        {product.category}
-      </span>
+        <div className="flex flex-wrap items-center gap-4 mb-6">
+          <span className="bg-gray-700 text-xs uppercase tracking-wider font-semibold px-3 py-1 rounded-full">
+            {product.category}
+          </span>
+          <span className="text-2xl font-bold text-green-400">
+            €{product.price.toFixed(2)}
+          </span>
+        </div>
 
-      <div className="text-xl font-semibold mb-6">
-        €{product.price.toFixed(2)}
+        <BuyButton product={product} />
       </div>
-
-      <BuyButton product={product} />
     </div>
   );
 }

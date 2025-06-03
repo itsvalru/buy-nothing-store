@@ -1,11 +1,10 @@
-import { Product } from "@/lib/products";
 import Link from "next/link";
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({ product }: { product: any }) {
   return (
     <Link
       href={`/products/${product.slug}`}
-      className="bg-gray-900 border border-gray-800 rounded-xl p-4 hover:scale-105 transition-transform"
+      className="bg-gray-800 border border-gray-800 rounded-xl p-4 hover:scale-105 transition-transform"
     >
       <h2 className="text-xl font-bold">{product.name}</h2>
       <p className="text-sm text-gray-400 mb-2">{product.description}</p>

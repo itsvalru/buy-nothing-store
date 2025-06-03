@@ -11,7 +11,7 @@ export default function ProductFilter({
 }: Props) {
   return (
     <div className="flex gap-2 flex-wrap mb-6">
-      {["All", ...categories].map((cat) => (
+      {[...categories].map((cat) => (
         <button
           key={cat}
           onClick={() => onSelect(cat)}

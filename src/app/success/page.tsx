@@ -20,11 +20,74 @@ export default function SuccessPage() {
         .eq("slug", slug)
         .single();
 
-      if (!error && data) setProduct(data);
+      if (!error && data) {
+        setProduct(data);
+      }
     };
 
     fetchProduct();
   }, [slug]);
+
+  useEffect(() => {
+    const registerPurchase = async () => {
+      if (!product || !product.uuid) return;
+
+      const {
+        data: { user: authUser },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError || !authUser) {
+        console.error("Not authenticated");
+        return;
+      }
+
+      const { data: existingPurchase, error: checkError } = await supabase
+        .from("purchases")
+        .select("*")
+        .eq("user_id", authUser.id)
+        .eq("product_id", product.uuid) // ✅ FIXED
+        .maybeSingle();
+
+      if (checkError) {
+        console.error("Error checking purchase:", checkError.message);
+        return;
+      }
+
+      if (!existingPurchase) {
+        const { error: incrementError } = await supabase.rpc(
+          "increment_total_spent",
+          {
+            amount: product.price || 0,
+          }
+        );
+
+        if (incrementError) {
+          console.error(
+            "Failed to increment total_spent:",
+            incrementError.message
+          );
+          return;
+        }
+
+        const { error: insertError } = await supabase.from("purchases").insert({
+          user_id: authUser.id,
+          product_id: product.uuid, // ✅ FIXED
+          amount: product.price || 0,
+        });
+
+        if (insertError) {
+          console.error("Failed to record purchase:", insertError.message);
+        } else {
+          console.log("✅ total_spent updated and purchase saved.");
+        }
+      } else {
+        console.log("⚠️ Purchase already exists. Skipping update.");
+      }
+    };
+
+    registerPurchase();
+  }, [product]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-24">
