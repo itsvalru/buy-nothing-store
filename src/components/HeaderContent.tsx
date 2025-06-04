@@ -57,63 +57,63 @@ export default function HeaderContent() {
           {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
         {/* User dropdown */}
-        {user ? (
-          <div className="relative ml-4" ref={dropdownRef}>
-            {user ? (
-              <button
-                onClick={() => setDropdownOpen((prev) => !prev)}
-                className="flex items-center gap-2 hover:bg-white/10 px-3 py-1.5 rounded-lg transition"
-              >
-                <Image
-                  src={
-                    user.avatar_url ||
-                    `https://api.dicebear.com/7.x/thumbs/png?seed=${
-                      user.display_name || "default"
-                    }`
-                  }
-                  alt={user.display_name || "User avatar"}
-                  width={32}
-                  height={32}
-                  className="rounded-full"
-                />
-                <span className="hidden sm:inline">{user.display_name}</span>
-                <ChevronDown size={16} />
-              </button>
-            ) : (
-              <Link
-                href="/login"
-                className="hidden md:inline bg-white text-black font-semibold px-4 py-2 rounded-xl hover:bg-gray-200 transition"
-              >
-                Login
-              </Link>
-            )}
 
-            {dropdownOpen && user && (
-              <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded-xl shadow-lg overflow-hidden z-50">
-                <Link
-                  href="/profile"
-                  className="block px-4 py-3 hover:bg-gray-100 transition"
-                >
-                  Profile
-                </Link>
-                <Link
-                  href="/settings"
-                  className="block px-4 py-3 hover:bg-gray-100 transition"
-                >
-                  Settings
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="block w-full text-left px-4 py-3 hover:bg-gray-100 transition"
-                >
-                  Log out
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          ""
-        )}
+        <div
+          className={`relative ml-4 ${user ? "" : "hidden md:block"}`}
+          ref={dropdownRef}
+        >
+          {user ? (
+            <button
+              onClick={() => setDropdownOpen((prev) => !prev)}
+              className="flex items-center gap-2 hover:bg-white/10 px-3 py-1.5 rounded-lg transition"
+            >
+              <Image
+                src={
+                  user.avatar_url ||
+                  `https://api.dicebear.com/7.x/thumbs/png?seed=${
+                    user.display_name || "default"
+                  }`
+                }
+                alt={user.display_name || "User avatar"}
+                width={32}
+                height={32}
+                className="rounded-full"
+              />
+              <span className="hidden sm:inline">{user.display_name}</span>
+              <ChevronDown size={16} />
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="hidden md:inline bg-white text-black font-semibold px-4 py-2 rounded-xl hover:bg-gray-200 transition"
+            >
+              Login
+            </Link>
+          )}
+
+          {dropdownOpen && user && (
+            <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded-xl shadow-lg overflow-hidden z-50">
+              <Link
+                href="/profile"
+                className="block px-4 py-3 hover:bg-gray-100 transition"
+              >
+                Profile
+              </Link>
+              <Link
+                href="/settings"
+                className="block px-4 py-3 hover:bg-gray-100 transition"
+              >
+                Settings
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left px-4 py-3 hover:bg-gray-100 transition"
+              >
+                Log out
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Mobile nav */}
