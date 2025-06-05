@@ -15,7 +15,10 @@ export async function POST(req: NextRequest) {
     if (payment.status !== "paid")
       return new Response("Not paid", { status: 200 });
 
-    const { slug, user_id } = payment.metadata || {};
+    const metadata = payment.metadata as { slug?: string; user_id?: string };
+
+    const slug = metadata.slug;
+    const user_id = metadata.user_id;
     console.log("📦 Webhook metadata:", payment.metadata);
 
     if (!slug || !user_id) throw new Error("Missing slug or user_id");

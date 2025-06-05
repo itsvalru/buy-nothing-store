@@ -5,12 +5,13 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { Product } from "@/types";
 
 export default function CheckoutPage() {
   const searchParams = useSearchParams();
   const slug = searchParams.get("slug");
 
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [method, setMethod] = useState("creditcard");
   const [loading, setLoading] = useState(false);
 
@@ -92,7 +93,7 @@ export default function CheckoutPage() {
 
       <div className="bg-gray-800 p-6 rounded-xl mb-8 shadow">
         <p className="text-lg mb-2">
-          You're buying: <strong>{product.name}</strong>
+          You&apos;re buying: <strong>{product.name}</strong>
         </p>
         <p className="text-gray-400">
           Price: <strong>€{product.price.toFixed(2)}</strong>

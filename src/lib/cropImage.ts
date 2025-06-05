@@ -1,4 +1,10 @@
-export default function getCroppedImg(imageSrc, pixelCrop) {
+import { croppedAreaPixelsType } from "@/types";
+
+export default function getCroppedImg(
+  imageSrc: string,
+  pixelCrop: croppedAreaPixelsType
+) {
+  console.log("Cropping image:", imageSrc, pixelCrop);
   return new Promise((resolve, reject) => {
     const image = new Image();
     image.crossOrigin = "anonymous";

@@ -7,11 +7,12 @@ import { supabase } from "@/lib/supabase";
 import Image from "next/image";
 import Cropper from "react-easy-crop";
 import getCroppedImg from "@/lib/cropImage";
+import { croppedAreaPixelsType } from "@/types";
 
 export default function SettingsPage() {
   const user = useUser();
   const router = useRouter();
-
+  console.log("User:", user);
   const [displayName, setDisplayName] = useState("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -21,11 +22,15 @@ export default function SettingsPage() {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] =
+    useState<croppedAreaPixelsType | null>(null);
 
-  const onCropComplete = useCallback((_: any, cropped: any) => {
-    setCroppedAreaPixels(cropped);
-  }, []);
+  const onCropComplete = useCallback(
+    (_: croppedAreaPixelsType, cropped: croppedAreaPixelsType) => {
+      setCroppedAreaPixels(cropped);
+    },
+    []
+  );
 
   useEffect(() => {
     if (user === null) {
@@ -37,7 +42,7 @@ export default function SettingsPage() {
           `https://api.dicebear.com/7.x/thumbs/png?seed=${user.email}`
       );
     }
-  }, [user]);
+  }, [router, user]);
 
   const triggerFileSelect = () => inputRef.current?.click();
 
@@ -54,7 +59,7 @@ export default function SettingsPage() {
   const applyCrop = async () => {
     if (!imageSrc || !croppedAreaPixels) return;
 
-    const blob = await getCroppedImg(imageSrc, croppedAreaPixels);
+    const blob = (await getCroppedImg(imageSrc, croppedAreaPixels)) as Blob;
     const file = new File([blob], "avatar.png", { type: "image/png" });
     setAvatarFile(file);
 
@@ -71,10 +76,10 @@ export default function SettingsPage() {
   const handleSave = async () => {
     setLoading(true);
 
-    let avatarUrl = user.avatar_url;
+    let avatarUrl = user?.avatar_url;
 
     if (avatarFile) {
-      const filePath = `${user.id}/avatar-${Date.now()}.png`;
+      const filePath = `${user?.id}/avatar-${Date.now()}.png`;
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
@@ -97,7 +102,7 @@ export default function SettingsPage() {
         display_name: displayName,
         avatar_url: avatarUrl,
       })
-      .eq("id", user.id);
+      .eq("id", user?.id);
 
     if (updateError) {
       alert(updateError.message);

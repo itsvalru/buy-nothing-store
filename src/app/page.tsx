@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import React from "react";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -9,12 +9,12 @@ export default function Home() {
         We sell literally nothing. Joke products, dumb ideas, pure meme energy.
         Buy nothing, own it anyway.
       </p>
-      <a
+      <Link
         href="/products"
         className="bg-white text-black px-6 py-3 rounded-xl font-bold hover:bg-gray-200 transition"
       >
         Browse Products
-      </a>
+      </Link>
     </main>
   );
 }

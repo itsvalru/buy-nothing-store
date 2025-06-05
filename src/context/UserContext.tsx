@@ -8,6 +8,8 @@ interface User {
   email: string;
   avatar_url?: string;
   display_name?: string;
+  total_spent?: number;
+  created_at?: string;
 }
 
 const UserContext = createContext<User | null>(null);

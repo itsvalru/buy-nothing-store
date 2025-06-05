@@ -3,12 +3,13 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { Product } from "@/types";
 
 export default function SuccessPage() {
   const searchParams = useSearchParams();
   const slug = searchParams.get("slug");
 
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     const fetchProduct = async () => {

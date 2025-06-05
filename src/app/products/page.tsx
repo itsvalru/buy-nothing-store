@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import ProductCard from "@/components/ProductCard";
 import ProductFilter from "@/components/ProductFilter";
+import { Product } from "@/types";
 
 export default function ProductPage() {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [category, setCategory] = useState("All");
   const [loading, setLoading] = useState(true);
 

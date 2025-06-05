@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Cropper from "react-easy-crop";
 import getCroppedImg from "@/lib/cropImage";
+import { croppedAreaPixelsType } from "@/types";
 
 export default function SignupForm() {
   const router = useRouter();
@@ -18,11 +19,15 @@ export default function SignupForm() {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] =
+    useState<croppedAreaPixelsType | null>(null);
 
-  const onCropComplete = useCallback((_: any, cropped: any) => {
-    setCroppedAreaPixels(cropped);
-  }, []);
+  const onCropComplete = useCallback(
+    (_: croppedAreaPixelsType, cropped: croppedAreaPixelsType) => {
+      setCroppedAreaPixels(cropped);
+    },
+    []
+  );
 
   const triggerFileSelect = () => inputRef.current?.click();
 
@@ -39,7 +44,7 @@ export default function SignupForm() {
   const applyCrop = async () => {
     if (!imageSrc || !croppedAreaPixels) return;
 
-    const blob = await getCroppedImg(imageSrc, croppedAreaPixels);
+    const blob = (await getCroppedImg(imageSrc, croppedAreaPixels)) as Blob;
     const file = new File([blob], "avatar.png", { type: "image/png" });
 
     setAvatarFile(file);

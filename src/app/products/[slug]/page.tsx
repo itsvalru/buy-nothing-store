@@ -3,19 +3,28 @@ import { supabase } from "@/lib/supabase";
 import BuyButton from "@/components/BuyButton";
 import Link from "next/link";
 
-export async function generateStaticParams() {
-  const { data: products } = await supabase.from("products").select("slug");
+interface ProductDetailProps {
+  params: {
+    slug: string;
+  };
+}
 
-  return (products || []).map((product) => ({
+export async function generateStaticParams() {
+  const { data: products, error } = await supabase
+    .from("products")
+    .select("slug");
+
+  if (error || !products) {
+    console.error("Failed to fetch slugs:", error?.message);
+    return [];
+  }
+
+  return products.map((product) => ({
     slug: product.slug,
   }));
 }
 
-export default async function ProductDetail({
-  params,
-}: {
-  params: { slug: string };
-}) {
+export default async function ProductDetail({ params }: ProductDetailProps) {
   const { data: product, error } = await supabase
     .from("products")
     .select("*")
