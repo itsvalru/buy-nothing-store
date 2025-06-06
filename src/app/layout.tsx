@@ -1,7 +1,8 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
 import { UserProvider } from "@/context/UserContext";
-import ClientHeader from "@/components/ClientHeader";
+
+import Header from "@/components/Header";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,9 +18,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-black text-white`}>
+      <body
+        suppressHydrationWarning={true}
+        className={`${inter.className} bg-black text-white`}
+      >
         <UserProvider>
-          <ClientHeader />
+          <Header />
           <main>{children}</main>
         </UserProvider>
       </body>

@@ -8,7 +8,7 @@ export default function AuthPage() {
   const [isLoginMode, setIsLoginMode] = useState(true);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black text-white px-4 py-12">
+    <div className="min-h-[calc(100vh-5rem)] flex items-center justify-center bg-black text-white px-4 py-12">
       <div className="w-full max-w-md">
         <h1 className="text-3xl font-extrabold text-center mb-6"></h1>
 

@@ -35,9 +35,12 @@ export default function HeaderContent() {
   };
 
   return (
-    <header className="bg-black text-white py-4 px-6 border-b border-white/10 shadow-sm">
-      <div className="max-w-6xl mx-auto flex justify-between items-center">
-        <Link href="/" className="text-xl font-bold tracking-tight">
+    <header className="bg-black text-white py-4 px-6 border-b border-white/10 shadow-sm sticky top-0 z-50 h-20">
+      <div className="max-w-6xl mx-auto flex justify-between items-center align-middle h-full">
+        <Link
+          href="/"
+          className="text-xl font-bold tracking-tight hidden md:block"
+        >
           Buy Nothing Store
         </Link>
         {/* Desktop nav */}
@@ -58,10 +61,7 @@ export default function HeaderContent() {
         </button>
         {/* User dropdown */}
 
-        <div
-          className={`relative ml-4 ${user ? "" : "hidden md:block"}`}
-          ref={dropdownRef}
-        >
+        <div className={`relative ml-4 ${user ? "" : ""}`} ref={dropdownRef}>
           {user ? (
             <button
               onClick={() => setDropdownOpen((prev) => !prev)}
@@ -85,7 +85,7 @@ export default function HeaderContent() {
           ) : (
             <Link
               href="/login"
-              className="hidden md:inline bg-white text-black font-semibold px-4 py-2 rounded-xl hover:bg-gray-200 transition"
+              className="md:inline bg-white text-black font-semibold px-4 py-2 rounded-xl hover:bg-gray-200 transition"
             >
               Login
             </Link>
@@ -118,7 +118,14 @@ export default function HeaderContent() {
 
       {/* Mobile nav */}
       {mobileMenuOpen && (
-        <div className="md:hidden mt-4 space-y-2 text-sm font-medium px-2">
+        <div className="md:hidden mt-6 space-y-2 text-sm font-medium px-2">
+          <Link
+            href="/"
+            className="block py-2 px-3 rounded hover:bg-white/10 transition"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Homepage
+          </Link>
           <Link
             href="/products"
             className="block py-2 px-3 rounded hover:bg-white/10 transition"
