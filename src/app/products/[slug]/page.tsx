@@ -28,6 +28,7 @@ export default async function ProductDetail({ params }: ProductDetailProps) {
   const { data: product, error } = await supabase
     .from("products")
     .select("*")
+    .not("category", "eq", "Lootbox")
     .eq("slug", params.slug)
     .single();
 
