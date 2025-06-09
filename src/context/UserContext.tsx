@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 
 interface User {
   id: string;
+  username: string;
   email: string;
   avatar_url?: string;
   display_name?: string;
@@ -28,7 +29,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       if (session?.user) {
         const { data: userProfile } = await supabase
           .from("users")
-          .select("id, email, avatar_url, display_name")
+          .select("id, username, email, avatar_url, display_name")
           .eq("id", session.user.id)
           .single();
 

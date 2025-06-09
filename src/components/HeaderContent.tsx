@@ -36,13 +36,14 @@ export default function HeaderContent() {
 
   return (
     <header className="bg-black text-white py-4 px-6 border-b border-white/10 shadow-sm sticky top-0 z-50 h-20">
-      <div className="max-w-6xl mx-auto flex justify-between items-center align-middle h-full">
+      <div className="max-w-6xl mx-auto flex justify-between items-center h-full">
         <Link
           href="/"
           className="text-xl font-bold tracking-tight hidden md:block"
         >
           Buy Nothing Store
         </Link>
+
         {/* Desktop nav */}
         <nav className="hidden md:flex gap-6 text-sm font-medium">
           <Link href="/products" className="hover:text-gray-300 transition">
@@ -51,7 +52,14 @@ export default function HeaderContent() {
           <Link href="/leaderboard" className="hover:text-gray-300 transition">
             Leaderboard
           </Link>
+          <Link href="/trade" className="hover:text-gray-300 transition">
+            Trade Center
+          </Link>
+          <Link href="/trade/inbox" className="hover:text-gray-300 transition">
+            Inbox
+          </Link>
         </nav>
+
         {/* Mobile menu button */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -59,9 +67,9 @@ export default function HeaderContent() {
         >
           {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
-        {/* User dropdown */}
 
-        <div className={`relative ml-4 ${user ? "" : ""}`} ref={dropdownRef}>
+        {/* User dropdown */}
+        <div className="relative ml-4" ref={dropdownRef}>
           {user ? (
             <button
               onClick={() => setDropdownOpen((prev) => !prev)}
@@ -94,7 +102,7 @@ export default function HeaderContent() {
           {dropdownOpen && user && (
             <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded-xl shadow-lg overflow-hidden z-50">
               <Link
-                href="/profile"
+                href={`/profile/${user.username}`}
                 className="block px-4 py-3 hover:bg-gray-100 transition"
               >
                 Profile
@@ -139,6 +147,20 @@ export default function HeaderContent() {
             onClick={() => setMobileMenuOpen(false)}
           >
             Leaderboard
+          </Link>
+          <Link
+            href="/trade"
+            className="block py-2 px-3 rounded hover:bg-white/10 transition"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Trade Center
+          </Link>
+          <Link
+            href="/trade/inbox"
+            className="block py-2 px-3 rounded hover:bg-white/10 transition"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Inbox
           </Link>
           {!user && (
             <Link

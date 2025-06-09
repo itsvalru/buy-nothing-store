@@ -16,13 +16,12 @@ export async function POST(req: NextRequest) {
       return new Response("Not paid", { status: 200 });
 
     const metadata = payment.metadata as { slug?: string; user_id?: string };
-
     const slug = metadata.slug;
     const user_id = metadata.user_id;
-    console.log("📦 Webhook metadata:", payment.metadata);
 
     if (!slug || !user_id) throw new Error("Missing slug or user_id");
 
+    // Avoid duplicate webhook handling
     const { data: existing } = await supabase
       .from("mollie_payments")
       .select("id")
@@ -34,21 +33,23 @@ export async function POST(req: NextRequest) {
       return new Response("Already processed", { status: 200 });
     }
 
+    // Fetch product by slug
     const { data: product, error: productError } = await supabase
       .from("products")
       .select("id, sales_count, price")
       .eq("slug", slug)
       .single();
-    console.log("📦 Product fetched:", product);
+
     if (productError || !product) throw new Error("Product not found");
 
-    // 1. Update product sales
-    await supabase
+    // Update sales count
+    const { error: updateError } = await supabase
       .from("products")
       .update({ sales_count: product.sales_count + 1 })
       .eq("id", product.id);
+    if (updateError) throw updateError;
 
-    // 2. Try increment_user_total_spent RPC
+    // Update total_spent
     const { error: rpcError } = await supabase.rpc(
       "increment_user_total_spent",
       {
@@ -59,35 +60,36 @@ export async function POST(req: NextRequest) {
 
     if (rpcError) {
       console.error("❌ RPC failed:", rpcError);
-
-      // 3. Try direct fallback update
       const { error: fallbackErr } = await supabase
         .from("users")
         .update({
           total_spent: supabase.raw("total_spent + ?", [product.price]),
         })
         .eq("id", user_id);
-
-      if (fallbackErr) {
-        console.error("❌ Direct update failed too:", fallbackErr);
-        throw fallbackErr;
-      } else {
-        console.log("✅ Fallback total_spent update succeeded");
-      }
-    } else {
-      console.log("✅ RPC total_spent update succeeded");
+      if (fallbackErr) throw fallbackErr;
     }
 
-    // 4. Log payment
+    // Log payment to mollie_payments
     await supabase.from("mollie_payments").insert({
       id: paymentId,
       product_id: product.id,
     });
 
-    console.log("✅ Webhook success for payment:", paymentId);
+    // Insert into purchases
+    const { error: purchaseError } = await supabase.from("purchases").insert({
+      user_id,
+      product_id: product.id,
+    });
+
+    if (purchaseError) {
+      console.error("❌ Failed to insert purchase:", purchaseError);
+      throw purchaseError;
+    }
+
+    console.log("✅ Webhook handled successfully");
     return new Response("OK", { status: 200 });
   } catch (err) {
-    console.error("Webhook error:", err);
+    console.error("❌ Webhook error:", err);
     return new Response("Webhook failed", { status: 500 });
   }
 }

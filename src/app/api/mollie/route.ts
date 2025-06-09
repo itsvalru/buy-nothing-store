@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       method,
       description: product.name,
       redirectUrl: `${req.nextUrl.origin}/success?slug=${product.slug}`,
-      webhookUrl: `https://848e-2a02-8071-57a1-8c00-31fd-bb0f-d485-6b01.ngrok-free.app/api/mollie-webhook`,
+      webhookUrl: `https://bb55-2a02-8071-57a1-8c00-6c26-1512-a6b3-a595.ngrok-free.app/api/mollie-webhook`,
       metadata: {
         slug: product.slug,
         user_id: user.id,

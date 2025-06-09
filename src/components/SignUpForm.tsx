@@ -11,6 +11,7 @@ export default function SignupForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [username, setUsername] = useState("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -92,6 +93,7 @@ export default function SignupForm() {
     const { error: insertError } = await supabase.from("users").insert({
       id: sessionUser.id,
       email,
+      username,
       display_name: displayName,
       total_spent: 0,
       avatar_url: avatarUrl,
@@ -144,7 +146,12 @@ export default function SignupForm() {
           placeholder="Display Name"
           className="w-full bg-gray-800 p-3 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
-
+        <input
+          value={username}
+          onChange={(e) => setUsername(e.target.value.toLowerCase())}
+          placeholder="Username"
+          className="w-full bg-gray-800 p-3 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+        />
         <input
           type="email"
           value={email}
