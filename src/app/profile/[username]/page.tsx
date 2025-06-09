@@ -231,7 +231,7 @@ export default function ProfilePage({
                     #{item.purchase_index}
                   </p>
                   <p
-                    className={`text-xs ml-2 ${
+                    className={`text-xs ml-2 content-center ${
                       isLootbox
                         ? rarityTextColors[item.products.rarity]
                         : "text-purple-400"
