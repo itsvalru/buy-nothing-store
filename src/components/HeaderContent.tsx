@@ -107,12 +107,14 @@ export default function HeaderContent() {
               <Link
                 href={`/profile/${user.username}`}
                 className="block px-4 py-3 hover:bg-gray-100 transition"
+                onClick={() => setDropdownOpen(false)}
               >
                 Profile
               </Link>
               <Link
                 href="/settings"
                 className="block px-4 py-3 hover:bg-gray-100 transition"
+                onClick={() => setDropdownOpen(false)}
               >
                 Settings
               </Link>
