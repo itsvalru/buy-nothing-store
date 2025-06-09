@@ -5,6 +5,23 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useUser } from "@/context/UserContext";
 
+const rarityGlow: Record<string, string> = {
+  common: "shadow-[0_0_6px_#9ca3af]",
+  rare: "shadow-[0_0_6px_#60a5fa]",
+  epic: "shadow-[0_0_6px_#a78bfa]",
+  legendary: "shadow-[0_0_8px_#f97316]",
+};
+
+const rarityTextColors: Record<string, string> = {
+  common: "text-gray-400",
+  rare: "text-blue-400",
+  epic: "text-purple-400",
+  legendary: "text-orange-400",
+};
+
+const capitalizeFirst = (str: string) =>
+  str.charAt(0).toUpperCase() + str.slice(1);
+
 export default function TradeNewPage() {
   const user = useUser();
   const router = useRouter();
@@ -17,8 +34,12 @@ export default function TradeNewPage() {
   const [selectedMine, setSelectedMine] = useState<string[]>([]);
   const [selectedTheirs, setSelectedTheirs] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [myPage, setMyPage] = useState(0);
+  const [theirPage, setTheirPage] = useState(0);
 
-  // Fetch target user + inventories
+  const maxMyPages = Math.ceil(myInventory.length / 10);
+  const maxTheirPages = Math.ceil(targetInventory.length / 10);
+
   useEffect(() => {
     const fetchData = async () => {
       if (!targetUsername || !user) return;
@@ -34,12 +55,12 @@ export default function TradeNewPage() {
       const [{ data: theirs }, { data: mine }] = await Promise.all([
         supabase
           .from("purchases")
-          .select("id, products(name), purchase_index")
+          .select("id, products(name, price, rarity, category), purchase_index")
           .eq("user_id", target?.id),
 
         supabase
           .from("purchases")
-          .select("id, products(name), purchase_index")
+          .select("id, products(name, price, rarity, category), purchase_index")
           .eq("user_id", user.id),
       ]);
 
@@ -126,22 +147,54 @@ export default function TradeNewPage() {
         <div>
           <h2 className="text-lg font-semibold mb-2">🎒 Your Inventory</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {myInventory.map((item) => (
-              <div
-                key={item.id}
-                onClick={() => toggleSelect(item.id, "mine")}
-                className={`cursor-pointer border p-3 rounded ${
-                  selectedMine.includes(item.id)
-                    ? "border-green-400 bg-green-950"
-                    : "border-gray-700 bg-[#0d0614]"
-                }`}
-              >
-                <p className="font-bold">{item.products.name}</p>
-                <p className="text-sm text-purple-400">
-                  #{item.purchase_index}
-                </p>
-              </div>
-            ))}
+            {myInventory.slice(myPage * 10, myPage * 10 + 10).map((item) => {
+              const isLootbox = item.products.category === "Lootbox";
+              const rarity = item.products.rarity;
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => toggleSelect(item.id, "mine")}
+                  className={`cursor-pointer border p-3 rounded transition-all ${
+                    selectedMine.includes(item.id)
+                      ? "border-green-400 bg-green-950"
+                      : "border-gray-700 bg-[#0d0614]"
+                  } ${isLootbox ? rarityGlow[rarity] : ""}`}
+                >
+                  <p className="font-bold truncate">{item.products.name}</p>
+                  <p className="text-sm text-gray-500">
+                    #{item.purchase_index}
+                  </p>
+                  <p
+                    className={`text-xs mt-1 ${
+                      isLootbox ? rarityTextColors[rarity] : "text-purple-400"
+                    }`}
+                  >
+                    {isLootbox
+                      ? capitalizeFirst(rarity)
+                      : item.products.price
+                      ? `$${item.products.price}`
+                      : ""}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex justify-between mt-2 text-sm text-gray-400">
+            <button
+              disabled={myPage === 0}
+              onClick={() => setMyPage((p) => Math.max(p - 1, 0))}
+            >
+              ◀ Prev
+            </button>
+            <span>
+              Page {myPage + 1} / {maxMyPages}
+            </span>
+            <button
+              disabled={myPage + 1 >= maxMyPages}
+              onClick={() => setMyPage((p) => p + 1)}
+            >
+              Next ▶
+            </button>
           </div>
         </div>
 
@@ -150,22 +203,56 @@ export default function TradeNewPage() {
             📦 {targetUser.display_name}'s Inventory
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {targetInventory.map((item) => (
-              <div
-                key={item.id}
-                onClick={() => toggleSelect(item.id, "theirs")}
-                className={`cursor-pointer border p-3 rounded ${
-                  selectedTheirs.includes(item.id)
-                    ? "border-blue-400 bg-blue-950"
-                    : "border-gray-700 bg-[#0d0614]"
-                }`}
-              >
-                <p className="font-bold">{item.products.name}</p>
-                <p className="text-sm text-purple-400">
-                  #{item.purchase_index}
-                </p>
-              </div>
-            ))}
+            {targetInventory
+              .slice(theirPage * 10, theirPage * 10 + 10)
+              .map((item) => {
+                const isLootbox = item.products.category === "Lootbox";
+                const rarity = item.products.rarity;
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => toggleSelect(item.id, "theirs")}
+                    className={`cursor-pointer border p-3 rounded transition-all ${
+                      selectedTheirs.includes(item.id)
+                        ? "border-blue-400 bg-blue-950"
+                        : "border-gray-700 bg-[#0d0614]"
+                    } ${isLootbox ? rarityGlow[rarity] : ""}`}
+                  >
+                    <p className="font-bold truncate">{item.products.name}</p>
+                    <p className="text-sm text-gray-500">
+                      #{item.purchase_index}
+                    </p>
+                    <p
+                      className={`text-xs mt-1 ${
+                        isLootbox ? rarityTextColors[rarity] : "text-purple-400"
+                      }`}
+                    >
+                      {isLootbox
+                        ? capitalizeFirst(rarity)
+                        : item.products.price
+                        ? `$${item.products.price}`
+                        : ""}
+                    </p>
+                  </div>
+                );
+              })}
+          </div>
+          <div className="flex justify-between mt-2 text-sm text-gray-400">
+            <button
+              disabled={theirPage === 0}
+              onClick={() => setTheirPage((p) => Math.max(p - 1, 0))}
+            >
+              ◀ Prev
+            </button>
+            <span>
+              Page {theirPage + 1} / {maxTheirPages}
+            </span>
+            <button
+              disabled={theirPage + 1 >= maxTheirPages}
+              onClick={() => setTheirPage((p) => p + 1)}
+            >
+              Next ▶
+            </button>
           </div>
         </div>
       </div>

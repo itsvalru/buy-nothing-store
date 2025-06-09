@@ -58,6 +58,9 @@ export default function HeaderContent() {
           <Link href="/trade/inbox" className="hover:text-gray-300 transition">
             Inbox
           </Link>
+          <Link href="/lootbox" className="hover:text-gray-300 transition">
+            Lootboxes
+          </Link>
         </nav>
 
         {/* Mobile menu button */}

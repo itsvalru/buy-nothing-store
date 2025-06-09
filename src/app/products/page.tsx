@@ -17,9 +17,15 @@ export default function ProductPage() {
       const { data, error } = await supabase
         .from("products")
         .select("*")
-        .order("sales_count", { ascending: false }); // optional sort
-      if (error) console.error("Failed to fetch products", error);
-      else setProducts(data || []);
+        .not("category", "eq", "Lootbox")
+        .order("sales_count", { ascending: false });
+
+      if (error) {
+        console.error("Failed to fetch products", error);
+      } else {
+        setProducts(data || []);
+      }
+
       setLoading(false);
     };
 

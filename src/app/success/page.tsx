@@ -9,32 +9,32 @@ export default function SuccessPage() {
   const searchParams = useSearchParams();
   const slug = searchParams.get("slug");
 
-  const [product, setProduct] = useState<Product | null>(null);
+  // const [product, setProduct] = useState<Product | null>(null);
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      if (!slug) return;
+  // useEffect(() => {
+  //   const fetchProduct = async () => {
+  //     if (!slug) return;
 
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("slug", slug)
-        .single();
+  //     const { data, error } = await supabase
+  //       .from("products")
+  //       .select("*")
+  //       .eq("slug", slug)
+  //       .single();
 
-      if (!error && data) {
-        setProduct(data);
-      }
-    };
+  //     if (!error && data) {
+  //       setProduct(data);
+  //     }
+  //   };
 
-    fetchProduct();
-  }, [slug]);
+  //   fetchProduct();
+  // }, [slug]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-24">
       <h1 className="text-3xl font-bold mb-4 text-center">
         ✅ Payment Successful!
       </h1>
-      {product ? (
+      {/* {product ? (
         <>
           <p className="text-center text-gray-400 mb-2">
             You now officially own <strong>{product.name}</strong>.
@@ -46,7 +46,7 @@ export default function SuccessPage() {
         </>
       ) : (
         <p className="text-gray-400">Loading product info...</p>
-      )}
+      )} */}
     </div>
   );
 }

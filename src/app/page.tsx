@@ -68,8 +68,8 @@ export default function Home() {
       </div>
 
       {/* New Sections Below */}
-      <div className="z-10 mt-4 max-w-4xl w-full">
-        {/* How it works */}
+      {/* <div className="z-10 mt-4 max-w-4xl w-full">
+        
         <section className="mb-24 text-center">
           <h2 className="text-3xl font-semibold mb-4">How It Works</h2>
           <p className="text-gray-400 mb-6">
@@ -97,7 +97,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Top Meme Products */}
+       
         <section className="mb-24 text-center">
           <h2 className="text-3xl font-semibold mb-4">Top Selling Nothings</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -116,7 +116,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Leaderboard Teaser */}
+       
         <section className="text-center">
           <h2 className="text-3xl font-semibold mb-4">
             Meet the Champions of Nothing
@@ -139,7 +139,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-      </div>
+      </div> */}
     </main>
   );
 }

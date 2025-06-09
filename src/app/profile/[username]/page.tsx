@@ -5,6 +5,20 @@ import { supabase } from "@/lib/supabase";
 import { useUser } from "@/context/UserContext";
 import Image from "next/image";
 
+const rarityGlow: Record<string, string> = {
+  common: "shadow-[0_0_10px_#9ca3af]",
+  rare: "shadow-[0_0_12px_#60a5fa]",
+  epic: "shadow-[0_0_12px_#a78bfa]",
+  legendary: "shadow-[0_0_15px_#f97316]",
+};
+
+const rarityTextColors: Record<string, string> = {
+  common: "text-gray-400",
+  rare: "text-blue-400",
+  epic: "text-purple-400",
+  legendary: "text-orange-400",
+};
+
 export default function ProfilePage({
   params,
 }: {
@@ -18,7 +32,9 @@ export default function ProfilePage({
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("date-desc");
+  const [currentPage, setCurrentPage] = useState(1);
 
+  const itemsPerPage = 12;
   const isOwnProfile = user?.id === profile?.id;
 
   useEffect(() => {
@@ -38,7 +54,7 @@ export default function ProfilePage({
 
       const { data: userPurchases } = await supabase
         .from("purchases")
-        .select("*, products(name)")
+        .select("*, products(name, price, rarity, category)")
         .eq("user_id", userProfile.id);
 
       setPurchases(userPurchases || []);
@@ -70,6 +86,9 @@ export default function ProfilePage({
     }
   };
 
+  const capitalizeFirst = (str: string) =>
+    str.charAt(0).toUpperCase() + str.slice(1);
+
   const filteredAndSorted = purchases
     .filter((item) =>
       item.products.name.toLowerCase().includes(search.toLowerCase())
@@ -87,6 +106,13 @@ export default function ProfilePage({
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       );
     });
+
+  const paginatedItems = filteredAndSorted.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(filteredAndSorted.length / itemsPerPage);
 
   if (loading) return <div className="p-8 text-white">Loading profile...</div>;
   if (!profile) return <div className="p-8 text-red-400">User not found</div>;
@@ -109,7 +135,7 @@ export default function ProfilePage({
       </div>
 
       <p className="text-purple-300 font-medium mb-10">
-        Total Spent: ${parseFloat(profile.total_spent).toFixed(2)}
+        Total Spent: €{parseFloat(profile.total_spent).toFixed(2)}
       </p>
 
       <section className="mb-12">
@@ -117,26 +143,48 @@ export default function ProfilePage({
         {purchases.filter((p) => p.highlighted).length === 0 && (
           <p className="text-gray-500">No items showcased.</p>
         )}
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-3 gap-5">
           {purchases
             .filter((item) => item.highlighted)
-            .map((item) => (
-              <div key={item.id} className="bg-[#1a102a] p-4 rounded-lg">
-                <p className="text-white font-bold">{item.products.name}</p>
-                <p className="text-sm text-gray-500">#{item.purchase_index}</p>
-                <p className="text-xs text-purple-400">
-                  {item.products.rarity}
-                </p>
-                {isOwnProfile && (
-                  <button
-                    onClick={() => toggleHighlight(item.id, item.highlighted)}
-                    className="mt-2 text-xs text-blue-300 hover:underline"
-                  >
-                    Remove from showcase
-                  </button>
-                )}
-              </div>
-            ))}
+            .map((item) => {
+              const isLootbox = item.products.category === "Lootbox";
+              return (
+                <div
+                  key={item.id}
+                  className={`bg-[#1a102a] p-4 rounded-lg ${
+                    isLootbox ? rarityGlow[item.products.rarity] : ""
+                  }`}
+                >
+                  <p className="text-white font-bold truncate">
+                    {item.products.name}
+                  </p>
+                  <div className="flex mt-1">
+                    <p className="text-sm text-gray-500">
+                      #{item.purchase_index}
+                    </p>
+                    <p
+                      className={`text-xs ml-2 content-center ${
+                        isLootbox
+                          ? rarityTextColors[item.products.rarity]
+                          : "text-purple-400"
+                      }`}
+                    >
+                      {isLootbox
+                        ? capitalizeFirst(item.products.rarity)
+                        : `$${item.products.price}`}
+                    </p>
+                  </div>
+                  {isOwnProfile && (
+                    <button
+                      onClick={() => toggleHighlight(item.id, item.highlighted)}
+                      className="mt-2 text-xs text-blue-300 hover:underline"
+                    >
+                      Remove from showcase
+                    </button>
+                  )}
+                </div>
+              );
+            })}
         </div>
       </section>
 
@@ -148,10 +196,12 @@ export default function ProfilePage({
             type="text"
             placeholder="Search by name..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
             className="w-full md:w-1/2 px-4 py-2 rounded bg-gray-900 text-white border border-gray-700"
           />
-
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value)}
@@ -164,28 +214,70 @@ export default function ProfilePage({
           </select>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4">
-          {filteredAndSorted.map((item) => (
-            <div key={item.id} className="bg-[#0d0614] p-4 rounded-lg">
-              <p className="text-white font-bold">{item.products.name}</p>
-              <p className="text-sm text-gray-500">#{item.purchase_index}</p>
-              <p className="text-xs text-purple-400">{item.products.rarity}</p>
-              <p className="text-xs text-gray-500 mt-2">
-                {new Date(item.created_at).toLocaleString()}
-              </p>
-              {isOwnProfile && (
-                <button
-                  onClick={() => toggleHighlight(item.id, item.highlighted)}
-                  className="mt-2 text-xs text-blue-300 hover:underline"
-                >
-                  {item.highlighted
-                    ? "Remove from showcase"
-                    : "Highlight this item"}
-                </button>
-              )}
-            </div>
-          ))}
+        <div className="grid md:grid-cols-3 gap-5">
+          {paginatedItems.map((item) => {
+            const isLootbox = item.products.category === "Lootbox";
+            const glowClass = isLootbox ? rarityGlow[item.products.rarity] : "";
+            return (
+              <div
+                key={item.id}
+                className={`bg-[#0d0614] p-4 rounded-lg ${glowClass}`}
+              >
+                <p className="text-white font-bold truncate">
+                  {item.products.name}
+                </p>
+                <div className="flex mt-1">
+                  <p className="text-sm text-gray-500">
+                    #{item.purchase_index}
+                  </p>
+                  <p
+                    className={`text-xs ml-2 ${
+                      isLootbox
+                        ? rarityTextColors[item.products.rarity]
+                        : "text-purple-400"
+                    }`}
+                  >
+                    {isLootbox
+                      ? capitalizeFirst(item.products.rarity)
+                      : `$${item.products.price}`}
+                  </p>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {new Date(item.created_at).toLocaleString()}
+                </p>
+                {isOwnProfile && (
+                  <button
+                    onClick={() => toggleHighlight(item.id, item.highlighted)}
+                    className="mt-2 text-xs text-blue-300 hover:underline"
+                  >
+                    {item.highlighted
+                      ? "Remove from showcase"
+                      : "Highlight this item"}
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-8 flex justify-center gap-2">
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`px-3 py-1 rounded ${
+                  currentPage === i + 1
+                    ? "bg-purple-600 text-white"
+                    : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
