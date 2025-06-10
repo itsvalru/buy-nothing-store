@@ -62,7 +62,7 @@ export default function Home() {
             animate={{ opacity: 1 }}
             transition={{ delay: 1.2, duration: 1 }}
           >
-            "Best investment I ever made." – Some guy who bought 23 nothings
+            "I was addicted to Gymshark but wow, nothing is much better." – Lynn
           </motion.div>
         </div>
       </div>
