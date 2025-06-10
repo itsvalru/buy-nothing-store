@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
@@ -10,11 +10,27 @@ import { Product } from "@/types";
 export default function CheckoutPage() {
   const searchParams = useSearchParams();
   const slug = searchParams.get("slug");
+  const router = useRouter();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [method, setMethod] = useState("creditcard");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        router.replace("/login");
+      }
+    };
+
+    checkAuth();
+  }, [router]);
+
+  // Fetch product
   useEffect(() => {
     if (slug) {
       const fetchProduct = async () => {

@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { useUser } from "@/context/UserContext";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const rarities = ["common", "rare", "epic", "legendary"] as const;
 
@@ -56,6 +57,21 @@ export default function LootboxInventory() {
     setBoxes(counts);
     setLoading(false);
   };
+
+  const router = useRouter();
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        router.replace("/login");
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   const playSound = (src: string) => {
     const audio = new Audio(src);

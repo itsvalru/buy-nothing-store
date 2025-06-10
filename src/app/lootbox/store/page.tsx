@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useUser } from "@/context/UserContext";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import router from "next/router";
+import { useRouter } from "next/navigation";
 
 const rarities = ["common", "rare", "epic", "legendary"] as const;
 
@@ -27,6 +29,20 @@ export default function LootboxStore() {
   });
 
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        router.replace("/login");
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   const totalPrice = useMemo(() => {
     return rarities.reduce((sum, rarity) => {

@@ -4,11 +4,26 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useUser } from "@/context/UserContext";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function TradeInboxPage() {
   const user = useUser();
   const [trades, setTrades] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        router.replace("/login");
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   useEffect(() => {
     const fetchTrades = async () => {
@@ -18,26 +33,26 @@ export default function TradeInboxPage() {
         .from("trades")
         .select(
           `
+          id,
+          status,
+          created_at,
+          sender:sender_id (id, username, display_name),
+          receiver:receiver_id (id, username, display_name),
+          trade_items (
             id,
-            status,
-            created_at,
-            sender:sender_id (id, username, display_name),
-            receiver:receiver_id (id, username, display_name),
-            trade_items (
+            purchase_id,
+            offered_by,
+            purchases (
               id,
-              purchase_id,
-              offered_by,
-              purchases (
-                id,
-                purchase_index,
-                products (name)
-              )
+              purchase_index,
+              products (name)
             )
-          `
+          )
+        `
         )
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order("created_at", { ascending: false });
-
+      console.log(data);
       setTrades(data || []);
       setLoading(false);
     };
@@ -49,11 +64,28 @@ export default function TradeInboxPage() {
     tradeId: string,
     action: "accepted" | "rejected"
   ) => {
-    if (action === "accepted") {
-      await supabase.rpc("process_trade_accept", { trade_uuid: tradeId });
-    }
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
-    await supabase.from("trades").update({ status: action }).eq("id", tradeId);
+    const endpoint = `/api/${
+      action === "accepted" ? "accept" : "reject"
+    }-trade`;
+    console.log(endpoint);
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.access_token}`,
+      },
+      body: JSON.stringify({ tradeId }),
+    });
+    console.log(session?.access_token);
+    const json = await res.json();
+    if (!res.ok) {
+      console.error("Trade response failed:", json.error);
+      return alert("Error processing trade. Try again.");
+    }
 
     setTrades((prev) =>
       prev.map((t) => (t.id === tradeId ? { ...t, status: action } : t))

@@ -35,7 +35,7 @@ export default function HeaderContent() {
   };
 
   return (
-    <header className="bg-black text-white py-4 px-6 border-b border-white/10 shadow-sm sticky top-0 z-50 h-20">
+    <header className="bg-black text-white py-4 px-6 shadow-sm sticky top-0 z-50 h-20">
       <div className="max-w-6xl mx-auto flex justify-between items-center h-full">
         <Link
           href="/"
@@ -131,7 +131,7 @@ export default function HeaderContent() {
 
       {/* Mobile nav */}
       {mobileMenuOpen && (
-        <div className="md:hidden mt-6 space-y-2 text-sm font-medium px-2">
+        <div className="md:hidden mt-4 pb-4 space-y-2 text-sm font-medium px-2 bg-black">
           <Link
             href="/"
             className="block py-2 px-3 rounded hover:bg-white/10 transition"
@@ -166,6 +166,12 @@ export default function HeaderContent() {
             onClick={() => setMobileMenuOpen(false)}
           >
             Inbox
+          </Link>
+          <Link
+            href="/lootbox"
+            className="block py-2 px-3 rounded hover:bg-white/10 transition"
+          >
+            Lootboxes
           </Link>
           {!user && (
             <Link

@@ -41,6 +41,20 @@ export default function TradeNewPage() {
   const maxTheirPages = Math.ceil(targetInventory.length / 10);
 
   useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        router.replace("/login");
+      }
+    };
+
+    checkAuth();
+  }, [router]);
+
+  useEffect(() => {
     const fetchData = async () => {
       if (!targetUsername || !user) return;
 
